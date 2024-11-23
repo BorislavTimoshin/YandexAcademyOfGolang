@@ -1,152 +1,137 @@
 package main
 
 import (
-    "errors"
-    "fmt"
-    "strconv"
-    "strings"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
-// Calc evaluates a mathematical expression given as a string.
+func StringToFloat64(str string) float64 {
+	degree := float64(1)
+	var res float64 = 0
+	var invers bool = false
+	for i := len(str); i > 0; i-- {
+		if str[i-1] == '-' {
+			invers = true
+		} else {
+			res += float64(9-int('9'-str[i-1])) * degree
+			degree *= 10
+		}
+	}
+	if invers {
+		res = 0 - res
+	}
+	return res
+}
+
+func IsSign(value rune) bool {
+	return value == '+' || value == '-' || value == '*' || value == '/'
+}
+
 func Calc(expression string) (float64, error) {
-    tokens := tokenize(expression)
-    postfix, err := infixToPostfix(tokens)
-    if err != nil {
-        return 0, err
-    }
-    return evaluatePostfix(postfix)
-}
+	if len(expression) < 3 {
+		return 0, fmt.Errorf("???")
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	var res float64
+	var b string
+	var c rune = 0
+	var resflag bool = false
+	var isc int
+	var countc int = 0
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	for _, value := range expression {
+		if IsSign(value) {
+			countc++
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	if IsSign(rune(expression[0])) || IsSign(rune(expression[len(expression)-1])) {
+		return 0, fmt.Errorf("???")
+	}
+	for i, value := range expression {
+		if value == '(' {
+			isc = i
+		}
+		if value == ')' {
+			calc, err := Calc(expression[isc+1 : i])
+			if err != nil {
+				return 0, fmt.Errorf("???")
+			}
+			calcstr := strconv.FormatFloat(calc, 'f', 0, 64)
+			i2 := i
+			i -= len(expression[isc:i+1]) - len(calcstr)
+			expression = strings.Replace(expression, expression[isc:i2+1], calcstr, 1) // Меняем скобки на результат выражения в них
+		}
+	}
+	if countc > 1 {
+		for i := 1; i < len(expression); i++ {
+			value := rune(expression[i])
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//Умножение и деление
+			if value == '*' || value == '/' {
+				var imin int = i - 1
+				if imin != 0 {
+					for !IsSign(rune(expression[imin])) && imin > 0 {
+						imin--
+					}
+					imin++
+				}
+				var imax int = i + 1
+				if imax == len(expression) {
+					imax--
+				} else {
+					for !IsSign(rune(expression[imax])) && imax < len(expression)-1 {
+						imax++
+					}
+				}
+				if imax == len(expression)-1 {
+					imax++
+				}
+				calc, err := Calc(expression[imin:imax])
+				if err != nil {
+					return 0, fmt.Errorf("???")
+				}
+				calcstr := strconv.FormatFloat(calc, 'f', 0, 64)
+				i -= len(expression[isc:i+1]) - len(calcstr) - 1
+				expression = strings.Replace(expression, expression[imin:imax], calcstr, 1) // Меняем скобки на результат выражения в них
+			}
+			if value == '+' || value == '-' || value == '*' || value == '/' {
+				c = value
+			}
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	for _, value := range expression + "s" {
+		switch {
+		case value == ' ':
+			continue
+		case value > 47 && value < 58: // Если это цифра
+			b += string(value)
+		case IsSign(value) || value == 's': // Если это знак
+			if resflag {
+				switch c {
+				case '+':
+					res += StringToFloat64(b)
+				case '-':
+					res -= StringToFloat64(b)
+				case '*':
+					res *= StringToFloat64(b)
+				case '/':
+					res /= StringToFloat64(b)
+				}
+			} else {
+				resflag = true
+				res = StringToFloat64(b)
+			}
+			b = strings.ReplaceAll(b, b, "")
+			c = value
 
-// tokenize splits the expression into tokens.
-func tokenize(expr string) []string {
-    var tokens []string
-    var currentToken strings.Builder
-
-    for _, char := range expr {
-        switch char {
-        case ' ':
-            continue
-        case '+', '-', '*', '/', '(', ')':
-            if currentToken.Len() > 0 {
-                tokens = append(tokens, currentToken.String())
-                currentToken.Reset()
-            }
-            tokens = append(tokens, string(char))
-        default:
-            currentToken.WriteRune(char)
-        }
-    }
-
-    if currentToken.Len() > 0 {
-        tokens = append(tokens, currentToken.String())
-    }
-
-    return tokens
-}
-
-// infixToPostfix converts an infix expression to postfix notation using the Shunting Yard algorithm.
-func infixToPostfix(tokens []string) ([]string, error) {
-    var output []string
-    var operators []string
-
-    for _, token := range tokens {
-        if isNumber(token) {
-            output = append(output, token)
-        } else if token == "(" {
-            operators = append(operators, token)
-        } else if token == ")" {
-            for len(operators) > 0 && operators[len(operators)-1] != "(" {
-                output = append(output, operators[len(operators)-1])
-                operators = operators[:len(operators)-1]
-            }
-            if len(operators) == 0 {
-                return nil, errors.New("mismatched parentheses")
-            }
-            operators = operators[:len(operators)-1] // Pop the '('
-        } else if isOperator(token) {
-            for len(operators) > 0 && precedence(operators[len(operators)-1]) >= precedence(token) {
-                output = append(output, operators[len(operators)-1])
-                operators = operators[:len(operators)-1]
-            }
-            operators = append(operators, token)
-        } else {
-            return nil, fmt.Errorf("invalid character: %s", token)
-        }
-    }
-
-    for len(operators) > 0 {
-        if operators[len(operators)-1] == "(" {
-            return nil, errors.New("mismatched parentheses")
-        }
-        output = append(output, operators[len(operators)-1])
-        operators = operators[:len(operators)-1]
-    }
-
-    return output, nil
-}
-
-// evaluatePostfix evaluates a postfix expression.
-func evaluatePostfix(postfix []string) (float64, error) {
-    var stack []float64
-
-    for _, token := range postfix {
-        if isNumber(token) {
-            num, _ := strconv.ParseFloat(token, 64)
-            stack = append(stack, num)
-        } else if isOperator(token) {
-            if len(stack) < 2 {
-                return 0, errors.New("invalid expression")
-            }
-            b := stack[len(stack)-1]
-            a := stack[len(stack)-2]
-            stack = stack[:len(stack)-2]
-
-            switch token {
-            case "+":
-                stack = append(stack, a+b)
-            case "-":
-                stack = append(stack, a-b)
-            case "*":
-                stack = append(stack, a*b)
-            case "/":
-                if b == 0 {
-                    return 0, errors.New("division by zero")
-                }
-                stack = append(stack, a/b)
-            default:
-                return 0, fmt.Errorf("unknown operator: %s", token)
-            }
-        } else {
-            return 0, fmt.Errorf("invalid token: %s", token)
-        }
-    }
-
-    if len(stack) != 1 {
-        return 0, errors.New("invalid expression")
-    }
-
-    return stack[0], nil
-}
-
-// isNumber checks if the given string represents a number.
-func isNumber(token string) bool {
-    _, err := strconv.ParseFloat(token, 64)
-    return err == nil
-}
-
-// isOperator checks if the given string represents an operator.
-func isOperator(token string) bool {
-    return token == "+" || token == "-" || token == "*" || token == "/"
-}
-
-// precedence returns the precedence of the given operator.
-func precedence(operator string) int {
-    switch operator {
-    case "*", "/":
-        return 2
-    case "+", "-":
-        return 1
-    default:
-        return 0
-    }
+			/////////////////////////////////////////////////////////////////////////////////////////////
+		case value == 's':
+		default:
+			return 0, fmt.Errorf("Not correct input")
+		}
+	}
+	return res, nil
 }
