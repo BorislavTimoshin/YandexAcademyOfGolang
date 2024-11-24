@@ -1,11 +1,9 @@
 package rpn_test
 
-import "github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/rpn"
-
 import (
 	"testing"
 
-	rpn "github.com/BorislavTimoshin/YandexAcademyOfGolang"
+	"github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/rpn"
 )
 
 func TestCalc(t *testing.T) {
