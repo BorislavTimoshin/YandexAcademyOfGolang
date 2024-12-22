@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/BorislavTimoshin/YandexAcademyOfGolang/internal/application"
+	"github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/calculator"
+	"net/http"
 )
 
 func main() {
-	app := application.New()
-	app.Run()
+	http.HandleFunc("/api/v1/calculate", CalculatorHandler)
+	http.ListenAndServe(":8080", nil)
 }

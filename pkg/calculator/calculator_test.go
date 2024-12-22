@@ -1,9 +1,9 @@
-package rpn_test
+package calculator_test
 
 import (
 	"testing"
 
-	"github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/rpn"
+	"github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/calculator"
 )
 
 func TestCalc(t *testing.T) {
@@ -71,7 +71,7 @@ func TestCalc(t *testing.T) {
 
 	for _, testCase := range testCasesFail {
 		t.Run(testCase.name, func(t *testing.T) {
-			val, err := rpn.Calc(testCase.expression)
+			val, err := calculator.Calc(testCase.expression)
 			if err == nil {
 				t.Fatalf("expression %s is invalid but result  %f was obtained", testCase.expression, val)
 			}

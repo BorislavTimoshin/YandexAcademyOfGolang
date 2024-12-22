@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/rpn"
+	"github.com/BorislavTimoshin/YandexAcademyOfGolang/pkg/calculator"
 )
 
 type Application struct {
@@ -36,7 +36,7 @@ func (a *Application) Run() error {
 			return nil
 		}
 		//вычисляем выражение
-		result, err := rpn.Calc(text)
+		result, err := calculator.Calc(text)
 		if err != nil {
 			log.Println(text, " calculation failed wit error: ", err)
 		} else {
