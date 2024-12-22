@@ -30,8 +30,7 @@ func CalculatorHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := Calc(req.Expression)
 	if err != nil {
 		if err.Error() == "Недопустимое выражение" || err.Error() == "Недопустимый символ" ||
-			err.Error() == "Несоответствующие скобки" || err.Error() == "Деление на ноль" ||
-			err.Error() == "Неизвестный оператор" {
+			err.Error() == "Несоответствующие скобки" || err.Error() == "Неизвестный оператор" {
 			http.Error(w, `{"error": "Expression is not valid"}`, http.StatusUnprocessableEntity)
 		} else {
 			log.Println("Internal server error:", err)
