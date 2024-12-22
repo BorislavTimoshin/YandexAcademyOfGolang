@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/api/v1/calculate", CalculatorHandler)
+	http.HandleFunc("/api/v1/calculate", calculator.CalculatorHandler)
 	http.ListenAndServe(":8080", nil)
 }

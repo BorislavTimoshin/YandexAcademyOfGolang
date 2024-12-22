@@ -1,4 +1,4 @@
-package calculator_handler
+package calculator
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ type Request struct {
 }
 
 type Response struct {
-	Result string `json:"result,omitempty"`
+	Result float64 `json:"result,omitempty"`
 	Error  string `json:"error,omitempty"`
 }
 
