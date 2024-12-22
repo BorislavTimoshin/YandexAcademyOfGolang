@@ -7,9 +7,13 @@
 Перед началом работы склонируйте к себе в IDE репозиторий: https://github.com/BorislavTimoshin/YandexAcademyOfGolang.git
 
 cmd/main.go - главный файл для запуска программы.
+
 internal/application/application.go - файл-посредник для диалога пользователем с приложением.
+
 Файл pkg/calculator/calculator.go - код алгоритма работы калькулятора
+
 Файл pkg/calculator/calculator_test.go - код с некоторыми тестами.
+
 Файл pkg/calculator/calculator_handler.go - код работы с серверной частью программы.
 
 Ознакомьтесь с проектом и запустите его:
